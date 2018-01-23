@@ -80,16 +80,19 @@ class Taschenrechner {
            $this->final_number = $this->zahlen[$tausend[0]] * $this->zahlen['tausend'];
         } else {
           //Hier kommt, wenn die Zahl nicht im Array ist - Es geht um das Wort VOR dem Wort Tausend! - Nur noch "und" oder "hundert"
-          echo $this->detective($tausend[0]);
+          $this->final_number = $this->detective($tausend[0]);
         }
       } else {
-          echo ($this->detective($tausend[0]) * $this->zahlen['tausend']) + $this->detective($tausend[1]) ;
+        //Hinter tausend ist etwas
+          $this->final_number = ($this->detective($tausend[0]) * $this->zahlen['tausend']) + $this->detective($tausend[1]) ;
       }
+      //Tausend nicht gefunden
   } else {
     $key_words = ['hundert', 'und'];
     //Schaut ob das Wort "hundert" drin ist
     if(preg_match("/$key_words[0]/", $this->zahl)) {
       $hundert = explode($key_words[0], $this->zahl);
+      //ist der letzte teil leer?
       if(empty($hundert[1])) {
         $this->final_number = $this->zahlen[$hundert[0]] * $this->zahlen['hundert'];
       } else {
@@ -101,12 +104,14 @@ class Taschenrechner {
         }
       }
     } else {
-      //ist es nicht
+      if(preg_match("/und/", $this->zahl)) {
+        $und = explode("und", $this->zahl);
+        $this->final_number = $this->zahlen[$und[0]] + $this->zahlen[$und[1]];
+      }
     }
   }
   return $this->final_number;
 }
-
 
   //Irgendwelche Zahlen interpretieren
   private function detective($zahl) {
@@ -126,12 +131,9 @@ class Taschenrechner {
       } else {
         //Keine UND Zahl vor tausend - Geh in das Array
         if(!empty($this->zahlen[$hundert[0]]) && !empty($this->zahlen[$hundert[1]])) {
-          //BUG
           $final = ($this->zahlen[$hundert[0]] * 100) + $this->zahlen[$hundert[1]];
-
         } else {
-          //BUG
-          $final = $this->zahlen[$hundert[0]];
+          $final = $this->zahlen[$hundert[0]] * $this->zahlen['hundert'];
         }
       }
     } else {
@@ -152,7 +154,7 @@ class Taschenrechner {
 $service = new Taschenrechner();
 //525386
 //Dreihunder geht nicht
-$zahl = "dreitausendsechshundert";
+$zahl = "fünfhundertfünfundzwanzigtausenddreihundertsechsundachtzig";
  // $zahl = 2000;
 
 echo "<hr>";
